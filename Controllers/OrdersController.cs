@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-
+using System.Text.Json;
 namespace carsaApi.Controllers
 {
 
@@ -247,5 +247,55 @@ namespace carsaApi.Controllers
 
         }
 
-    }
-}
+
+        // pagination
+
+                [HttpGet]
+        [Route("get-all-Orders-page")]
+        public async Task<ActionResult> GetAllOrdersPage([FromQuery]PagingParameterModel  @params)
+        {
+
+
+            List<ResponseOrder> responseOrders = new List<ResponseOrder>();
+
+            var data = await _context.Orders.ToListAsync();
+            // List<Cart> carts=new List<Cart>();
+            foreach (var item in data)
+            {
+                User user = await _context.Users.FindAsync(item.userId);
+                Address address = _context.Addresses.FirstOrDefault(p => p.Id == item.AddressId);
+                  
+   var carts=_context.Carts.Where(p => p.OrderId == item.Id).ToList();
+                  
+
+                responseOrders.Add(new ResponseOrder
+                {
+                    Order = item,
+                    UserEmail = user.Email,
+                    UserName = user.FullName,
+                    UserPhone = user.UserName,
+                    Address = address,
+                    Products=carts,
+                });
+
+            }
+
+
+
+
+            var paginationMetadata = new PaginationMetadata(responseOrders.Count(), @params.Page, @params.ItemsPerPage);
+             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            var items =  responseOrders.Skip((@params.Page - 1) * @params.ItemsPerPage)
+                                       .Take(@params.ItemsPerPage);
+    return Ok(new {
+
+        items=items,
+        currentPage=@params.Page,
+        totalPage=paginationMetadata.TotalPages
+    });
+        }
+        }
+        }
+
+    

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using carsaApi.Dto;
+using System.Text.Json;
 namespace carsaApi.Controllers
 {
 
@@ -42,7 +43,7 @@ namespace carsaApi.Controllers
         }
 
 
-   [HttpGet]
+       [HttpGet]
         [Route("get-products-slider")]
         public async Task<ActionResult> GetAllSlider()
         {
@@ -143,5 +144,74 @@ namespace carsaApi.Controllers
 
         }
 
+
+
+
+
+
+
+        // pagination
+
+        [HttpGet]
+        [Route("get-products-admin")]
+        public async Task<ActionResult> GetAllAdmin([FromQuery]PagingParameterModel  @params)
+        {
+            var bransItems = await _context.Products.ToListAsync();
+                 var paginationMetadata = new PaginationMetadata(bransItems.Count(), @params.Page, @params.ItemsPerPage);
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            var items =  bransItems.Skip((@params.Page - 1) * @params.ItemsPerPage)
+                                       .Take(@params.ItemsPerPage);
+    return Ok(new {
+
+        items=items,
+        currentPage=@params.Page,
+        totalPage=paginationMetadata.TotalPages
+    });
+
+        }
+
+
+
+        // user 
+          [HttpGet]
+        [Route("get-products-by-category-page")]
+        public async Task<ActionResult> GetAllByCategoryPage([FromForm] int categoryId,[FromForm]PagingParameterModel  @params)
+        {
+            var bransItems = await _context.Products.Where(x => x.CategoryId == categoryId).ToListAsync();
+              var paginationMetadata = new PaginationMetadata(bransItems.Count(), @params.Page, @params.ItemsPerPage);
+             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            var items =  bransItems.Skip((@params.Page - 1) * @params.ItemsPerPage)
+                                       .Take(@params.ItemsPerPage);
+    return Ok(new {
+
+        items=items,
+        currentPage=@params.Page,
+        totalPage=paginationMetadata.TotalPages
+    });
+        }
+
+
+
+
+          [HttpGet]
+        [Route("get-products-by-barnd-page")]
+        public async Task<ActionResult> GetAllByBrand([FromForm] int categoryId,[FromForm]PagingParameterModel  @params)
+        {
+            var bransItems = await _context.Products.Where(x => x.BrandId == categoryId).ToListAsync();
+             var paginationMetadata = new PaginationMetadata(bransItems.Count(), @params.Page, @params.ItemsPerPage);
+             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+
+            var items =  bransItems.Skip((@params.Page - 1) * @params.ItemsPerPage)
+                                       .Take(@params.ItemsPerPage);
+    return Ok(new {
+
+        items=items,
+        currentPage=@params.Page,
+        totalPage=paginationMetadata.TotalPages
+    });
+        }
+        }
+
     }
-}
