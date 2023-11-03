@@ -1,30 +1,30 @@
 {
   "format": 1,
   "restore": {
-    "F:\\web\\carsaApi\\carsaApi.csproj": {}
+    "/Users/gatekee/projects/carsaApi/carsaApi.csproj": {}
   },
   "projects": {
-    "F:\\web\\carsaApi\\carsaApi.csproj": {
+    "/Users/gatekee/projects/carsaApi/carsaApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "F:\\web\\carsaApi\\carsaApi.csproj",
+        "projectUniqueName": "/Users/gatekee/projects/carsaApi/carsaApi.csproj",
         "projectName": "carsaApi",
-        "projectPath": "F:\\web\\carsaApi\\carsaApi.csproj",
-        "packagesPath": "C:\\Users\\obama\\.nuget\\packages\\",
-        "outputPath": "F:\\web\\carsaApi\\obj\\",
+        "projectPath": "/Users/gatekee/projects/carsaApi/carsaApi.csproj",
+        "packagesPath": "/Users/gatekee/.nuget/packages/",
+        "outputPath": "/Users/gatekee/projects/carsaApi/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\obama\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "/Users/gatekee/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
-          "net5.0"
+          "net6.0"
         ],
         "sources": {
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
-          "net5.0": {
-            "targetAlias": "net5.0",
+          "net6.0": {
+            "targetAlias": "net6.0",
             "projectReferences": {}
           }
         },
@@ -35,8 +35,8 @@
         }
       },
       "frameworks": {
-        "net5.0": {
-          "targetAlias": "net5.0",
+        "net6.0": {
+          "targetAlias": "net6.0",
           "dependencies": {
             "AutoMapper": {
               "target": "Package",
@@ -92,6 +92,10 @@
               "target": "Package",
               "version": "[5.0.9, )"
             },
+            "Pomelo.EntityFrameworkCore.MySql": {
+              "target": "Package",
+              "version": "[5.0.0-beta.1, )"
+            },
             "Swashbuckle.AspNetCore": {
               "target": "Package",
               "version": "[5.6.3, )"
@@ -103,7 +107,8 @@
             "net47",
             "net471",
             "net472",
-            "net48"
+            "net48",
+            "net481"
           ],
           "assetTargetFallback": true,
           "warn": true,
@@ -115,7 +120,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.405\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/local/share/dotnet/sdk/6.0.401/RuntimeIdentifierGraph.json"
         }
       }
     }

@@ -13,6 +13,15 @@ namespace carsaApi.Controllers
 {
     public class AddressesController : Controller
     {
+        //  dotnet commends
+
+// dotnet publish --configuration Release
+// migrations dotnet
+// dotnet ef migrations add InitialCreate
+ // update database 
+// dotnet ef database update
+// create
+// dotnet new webapi -n name 
 
         private readonly CarsaApiContext myDbContext;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -31,7 +40,7 @@ namespace carsaApi.Controllers
         public async Task<ActionResult> getAdresses()
         {
             User user = await Functions.getCurrentUser(_httpContextAccessor, myDbContext);
-            var data = await myDbContext.Addresses.Where(x => x.UserId == user.Id).AsNoTracking().ToListAsync();
+            var data = await myDbContext.Addresses.Where(x => x.UserId == user.Id && x.Status==0).AsNoTracking().ToListAsync();
             return Ok(data);
         }
 
@@ -76,7 +85,7 @@ namespace carsaApi.Controllers
         public async Task<ActionResult> deleteAddress(int id)
         {
             Address address = await myDbContext.Addresses.FindAsync(id);
-            myDbContext.Addresses.Remove(address);
+             address.Status =1;
             myDbContext.SaveChanges();
             return Ok(address);
         }

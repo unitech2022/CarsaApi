@@ -81,23 +81,25 @@ namespace awamrakeApi.Controllers
 
 
 
-        [HttpPost()]
+        [HttpPost("{id}")]
         [Route("update-sitting")]
-        public ActionResult UpdateSitting([FromForm] int id, [FromForm] CreateSittingDto category)
+        public async Task<ActionResult> UpdateSitting([FromForm] int id, [FromForm] CreateSittingDto category)
         {
-            var brandModelFromRepo =_context.Sittings.FirstOrDefault(p =>p.Id==id);
-            if (brandModelFromRepo == null)
+            Sitting sitting =await _context.Sittings.FirstOrDefaultAsync(p =>p.Id==id);
+            if (sitting == null)
             {
                 return NotFound();
             }
 
 
-            _mapper.Map(category, brandModelFromRepo);
+        //   await  _mapper.Map(category, brandModelFromRepo);
 
-    
-           _context.SaveChangesAsync();
+    sitting.Name=category.Name;
+    sitting.value=category.value;
 
-            return NoContent();
+         await  _context.SaveChangesAsync();
+
+            return Ok(sitting);
 
         }
 

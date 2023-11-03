@@ -41,6 +41,18 @@ namespace carsaApi.Data
         }
 
 
+           public void AddCategoryWork(WorkshopCategory ct)
+        {
+            if (ct == null)
+            {
+                throw new ArgumentNullException(nameof(ct));
+            }
+
+            _context.WorkCategories.Add(ct);
+        }
+
+
+
         public Category GetCategoryById(int id)
         {
             return _context.Categories.FirstOrDefault(p => p.Id == id);

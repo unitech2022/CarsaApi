@@ -10,12 +10,14 @@ namespace carsaApi.Models
         public string Lable { get; set; }
         public double Lat { get; set; }
         public double Lng { get; set; }
+        public int Status { get; set; }
 
         public DateTime CreatedAt { get; set; }
 
         public Address()
         {
             CreatedAt = DateTime.Now;
+            Status=0;
         }
     }
 }

@@ -41,10 +41,26 @@ namespace carsaApi.Controllers
         public async Task<ActionResult> GetAll()
         {
 
+            List<ResponseOrderUser> responseOrders = new List<ResponseOrderUser>();
             User user = await Functions.getCurrentUser(_httpContextAccessor, _context);
             var data = await _context.Orders.Where(x => (x.userId == user.Id)).ToListAsync();
 
-            return Ok(data);
+            foreach (var item in data)
+            {
+                Address address = await _context.Addresses.FirstOrDefaultAsync(x => x.Id == item.AddressId);
+
+                responseOrders.Add(new ResponseOrderUser
+                {
+                    Order = item,
+                    Address = address
+
+                });
+
+
+
+            }
+
+            return Ok(responseOrders);
         }
 
 
@@ -63,9 +79,24 @@ namespace carsaApi.Controllers
             {
                 User user = await _context.Users.FindAsync(item.userId);
                 Address address = _context.Addresses.FirstOrDefault(p => p.Id == item.AddressId);
-                  
-   var carts=_context.Carts.Where(p => p.OrderId == item.Id).ToList();
-                  
+
+
+                var carts = _context.Carts.Where(p => p.OrderId == item.Id).ToList();
+
+                // foreach (var cart in carts)
+                // {
+
+
+                //     responseCarts.Add(new ResponseCart
+                //     {
+                //         productModel = product,
+                //         cartModel = cart
+                //     });
+
+                // }
+
+
+
 
                 responseOrders.Add(new ResponseOrder
                 {
@@ -74,7 +105,7 @@ namespace carsaApi.Controllers
                     UserName = user.FullName,
                     UserPhone = user.UserName,
                     Address = address,
-                    Products=carts,
+                    // Products=responseCarts,
                 });
 
             }
@@ -84,6 +115,11 @@ namespace carsaApi.Controllers
 
             return Ok(responseOrders);
         }
+
+
+
+
+
 
         [Authorize(Roles = "user")]
         [HttpGet]
@@ -95,8 +131,37 @@ namespace carsaApi.Controllers
             var data = await _context.Carts.Where(x => (x.UserId == user.Id && x.OrderId == orderId)).ToListAsync();
 
             return Ok(data);
-            
+
         }
+
+
+
+
+
+        [HttpPost]
+        [Route("get-Order-details-admin")]
+        public async Task<ActionResult> GetOrderDetailsAdmin([FromForm] int orderId)
+        {
+
+            List<ResponseCart> responseCarts = new List<ResponseCart>();
+            var data = await _context.Carts.Where(x => x.OrderId == orderId).ToListAsync();
+
+            foreach (var item in data)
+            {
+                Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == item.ProductId);
+                responseCarts.Add(new ResponseCart
+                {
+                    cartModel = item,
+                    productModel = product
+                });
+
+            }
+
+            return Ok(responseCarts);
+
+        }
+
+
 
         [Authorize(Roles = "user")]
         [HttpPost]
@@ -173,7 +238,7 @@ namespace carsaApi.Controllers
 
             // User user = await Functions.getCurrentUser(_httpContextAccessor, _context);
 
-            Order order = _context.Orders.FirstOrDefault(p => p.Id == id );
+            Order order = _context.Orders.FirstOrDefault(p => p.Id == id);
 
             if (order == null)
             {
@@ -183,7 +248,7 @@ namespace carsaApi.Controllers
 
             _repository.DeleteOrder(order);
             _repository.SaveChanges();
-            var data = await _context.Carts.Where(x =>  x.OrderId == id).ToListAsync();
+            var data = await _context.Carts.Where(x => x.OrderId == id).ToListAsync();
 
             foreach (var cart in data)
             {
@@ -206,7 +271,7 @@ namespace carsaApi.Controllers
 
 
 
-       
+
 
         [HttpPost("{id}")]
         [Route("update-Order")]
@@ -250,23 +315,37 @@ namespace carsaApi.Controllers
 
         // pagination
 
-                [HttpGet]
+        [HttpGet]
         [Route("get-all-Orders-page")]
-        public async Task<ActionResult> GetAllOrdersPage([FromQuery]PagingParameterModel  @params)
+        public async Task<ActionResult> GetAllOrdersPage([FromQuery] PagingParameterModel @params)
         {
 
 
             List<ResponseOrder> responseOrders = new List<ResponseOrder>();
-
+            List<ResponseCart> responseCarts = new List<ResponseCart>();
             var data = await _context.Orders.ToListAsync();
             // List<Cart> carts=new List<Cart>();
             foreach (var item in data)
             {
                 User user = await _context.Users.FindAsync(item.userId);
                 Address address = _context.Addresses.FirstOrDefault(p => p.Id == item.AddressId);
-                  
-   var carts=_context.Carts.Where(p => p.OrderId == item.Id).ToList();
-                  
+
+                var carts = _context.Carts.Where(p => p.OrderId == item.Id).ToList();
+
+                foreach (var cart in carts)
+                {
+                    Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == cart.ProductId);
+
+                    responseCarts.Add(new ResponseCart
+                    {
+                        productModel = product,
+                        cartModel = cart
+                    });
+
+                }
+
+
+
 
                 responseOrders.Add(new ResponseOrder
                 {
@@ -275,7 +354,7 @@ namespace carsaApi.Controllers
                     UserName = user.FullName,
                     UserPhone = user.UserName,
                     Address = address,
-                    Products=carts,
+                    // Products=responseCarts,
                 });
 
             }
@@ -284,18 +363,19 @@ namespace carsaApi.Controllers
 
 
             var paginationMetadata = new PaginationMetadata(responseOrders.Count(), @params.Page, @params.ItemsPerPage);
-             Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
-            var items =  responseOrders.Skip((@params.Page - 1) * @params.ItemsPerPage)
+            var items = responseOrders.Skip((@params.Page - 1) * @params.ItemsPerPage)
                                        .Take(@params.ItemsPerPage);
-    return Ok(new {
+            return Ok(new
+            {
 
-        items=items,
-        currentPage=@params.Page,
-        totalPage=paginationMetadata.TotalPages
-    });
+                items = items,
+                currentPage = @params.Page,
+                totalPage = paginationMetadata.TotalPages
+            });
         }
-        }
-        }
+    }
+}
 
-    
+

@@ -61,7 +61,7 @@ namespace carsaApi.Controllers
             // await _context.SaveChangesAsync();
             Cart.Price = product.Price;
             Cart.Total = Cart.Quantity * product.Price;
-
+             
             await _context.Carts.AddAsync(Cart);
 
             _context.SaveChanges();

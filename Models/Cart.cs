@@ -11,21 +11,21 @@ namespace carsaApi.Models
 
         public int OrderId { get; set; }
 
-       public string Image { get; set; }
+        public string Image { get; set; }
 
-       public string NameProduct { get; set; }
+        public string NameProduct { get; set; }
  
         public int ProductId { get; set; }
 
+    //    public string ProductNumber { get; set; }
+        public double Price { get; set; }
 
- public double Price { get; set; }
-
-  public double Total { get; set; }
-
-
+        public double Total { get; set; }
 
 
-        public string UserId { get; set; }
+
+
+         public string UserId { get; set; }
 
 
 

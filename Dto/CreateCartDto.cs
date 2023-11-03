@@ -21,7 +21,7 @@ namespace carsaApi.Dto
         public double Total { get; set; }
         public string NameProduct { get; set; }
 
-
+  public string ProductNumber { get; set; }
         public string UserId { get; set; }
 
 

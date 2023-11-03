@@ -27,7 +27,15 @@ namespace carsaApi.Models
 
         public string Image { get; set; }
 
+        public bool DetailsPrice { get; set; }
+
+         
+        public string TimeDelivery { get; set; }
+
         public int CategoryId { get; set; }
+
+
+         public int CarModelId { get; set; }
 
 
         public int BrandId { get; set; }
@@ -36,12 +44,15 @@ namespace carsaApi.Models
 
         public int Status { get; set; }
 
-        Product()
+        //  public double Status { get; set; }
+
+     public   Product()
         {
 
             IsCart = false;
             IsFav = false;
         }
+        
     }
 
 

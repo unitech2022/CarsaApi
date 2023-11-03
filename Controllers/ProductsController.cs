@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using carsaApi.Dto;
 using System.Text.Json;
+using System;
+
 namespace carsaApi.Controllers
 {
 
@@ -74,13 +76,26 @@ namespace carsaApi.Controllers
 
 
 
-   [HttpGet]
+       [HttpGet]
         [Route("get-products-by-barnd")]
         public async Task<ActionResult> GetAllByBrand([FromForm] int categoryId)
         {
-            var bransItems = await _context.Products.Where(x => x.BrandId == categoryId).ToListAsync();
+            var bransItems = await _context.Products.Where(x => x.BrandId == categoryId ).ToListAsync();
             return Ok(bransItems);
         }
+
+
+       [HttpGet]
+        [Route("get-product-by-id")]
+        public async Task<ActionResult> GetProductByID([FromForm] int id)
+        {
+            Product product = await _context.Products.FirstOrDefaultAsync(x => x.Id == id);
+            if(product==null){
+                return NotFound();
+            }
+            return Ok(product);
+        }
+
 
 
         [HttpPost]
@@ -96,6 +111,26 @@ namespace carsaApi.Controllers
 
             return Ok(coomansModel);
 
+
+        }
+
+         [HttpPost]
+        [Route("add-product-list")]
+        public ActionResult<Product> AddProducts([FromForm] IEnumerable<Product> products)
+        {
+            // Console.WriteLine("."+products.Count);
+            foreach (var item in products)
+            {
+                var coomansModel = _mapper.Map<Product>(item);
+            _repository.AddProduct(coomansModel);
+            _repository.SaveChanges();
+            // var commandReadDto = _mapper.Map<CategoryReadDto>(coomansModel);
+
+
+           
+            }
+            
+            return Ok(products);
 
         }
 
@@ -195,18 +230,18 @@ namespace carsaApi.Controllers
 
 
 
+
           [HttpGet]
         [Route("get-products-by-barnd-page")]
-        public async Task<ActionResult> GetAllByBrand([FromForm] int categoryId,[FromForm]PagingParameterModel  @params)
+        public async Task<ActionResult> GetAllByBrand([FromForm] int categoryId ,[FromForm] int carModeId,[FromForm]PagingParameterModel  @params)
         {
-            var bransItems = await _context.Products.Where(x => x.BrandId == categoryId).ToListAsync();
+            var bransItems = await _context.Products.Where(x => x.CategoryId == categoryId && x.CarModelId == carModeId).ToListAsync();
              var paginationMetadata = new PaginationMetadata(bransItems.Count(), @params.Page, @params.ItemsPerPage);
              Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(paginationMetadata));
 
             var items =  bransItems.Skip((@params.Page - 1) * @params.ItemsPerPage)
                                        .Take(@params.ItemsPerPage);
     return Ok(new {
-
         items=items,
         currentPage=@params.Page,
         totalPage=paginationMetadata.TotalPages

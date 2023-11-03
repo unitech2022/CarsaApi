@@ -1,6 +1,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using System.Collections.Generic;
 using carsaApi.Data;
 using carsaApi.Dto;
 using carsaApi.Helpers;
@@ -41,8 +42,19 @@ namespace carsaApi.Controllers
         public async Task<ActionResult> GetAll()
         {
 
+            List<ResponseFavorite>responseFavorite=new List<ResponseFavorite>();
+
             User user = await Functions.getCurrentUser(_httpContextAccessor, _context);
             var data = await _context.Favorites.Where(x => x.UserId == user.Id).ToListAsync();
+            // foreach (var item in data)
+            // {
+            //     Product product=await _context.Products.FirstOrDefaultAsync(x => x.Id == item.ProductId);     
+            //      responseFavorite.Add(new ResponseFavorite{
+            //         Favorite=item,
+            //         Product=product
+            // });
+                
+            // }
 
             return Ok(data);
         }

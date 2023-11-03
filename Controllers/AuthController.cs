@@ -21,6 +21,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 namespace carsaApi.Controllers
 {
+
+    // code >>>> 
     public class AuthController : Controller
     {
         private readonly RoleManager<IdentityRole> _roleManager;
@@ -105,10 +107,11 @@ namespace carsaApi.Controllers
                 await _roleManager.CreateAsync(new IdentityRole(model.Role));
             var result = await userManager.CreateAsync(userToCreate, model.Password);
             await userManager.AddToRoleAsync(userToCreate, model.Role);
-            string Code = RandomNumber();
-            userToCreate.Code = Code;
+
+            // string Code = userToCreate.Email;
+            userToCreate.Code = model.Code;
             await _context.SaveChangesAsync();
-            return Ok(new { success = true, Code = Code });
+            return Ok(new { success = true, Code = model.Code });
         }
 
         [HttpPost("auth/admin/signup")]
@@ -158,12 +161,12 @@ namespace carsaApi.Controllers
                 error = "رقم الهاتف مسجل من قبل";
                 return this.StatusCode(StatusCodes.Status200OK, error);
             }
-            user = await _context.Users.Where(x => x.Email == userForValidate.Email).FirstOrDefaultAsync();
-            if (user != null)
-            {
-                error = "البريد الإلكتروني مسجل من قبل";
-                return BadRequest(error);
-            }
+            // user = await _context.Users.Where(x => x.Email == userForValidate.Email).FirstOrDefaultAsync();
+            // if (user != null)
+            // {
+            //     error = "البريد الإلكتروني مسجل من قبل";
+            //     return BadRequest(error);
+            // }
 
             return Ok("success");
         }
@@ -173,7 +176,7 @@ namespace carsaApi.Controllers
 
 
 
-         [HttpPost("/auth/admin-login")]
+        [HttpPost("/auth/admin-login")]
         public async Task<IActionResult> LoginAdmin(AdminForLoginRequest adminForLogin)
         {
             var loginUser = await userManager.FindByNameAsync(adminForLogin.UserName);
@@ -225,7 +228,7 @@ namespace carsaApi.Controllers
         {
             var loginUser = await userManager.FindByNameAsync(model.userName);
             var driver = await _context.Drivers.Where(x => x.UserId == loginUser.Id).FirstOrDefaultAsync();
-            if (loginUser != null)
+            if (loginUser != null && loginUser.Code == model.code)
             {
                 var userRoles = await userManager.GetRolesAsync(loginUser);
 
@@ -262,6 +265,28 @@ namespace carsaApi.Controllers
                 });
             }
             return Unauthorized();
+        }
+
+
+        [HttpPost("/auth/get-Code")]
+        public async Task<IActionResult> GetCode([FromForm] string phone)
+        {
+            var loginUser = await userManager.FindByNameAsync(phone);
+            if (loginUser == null)
+            {
+
+                return Unauthorized();
+            }
+
+            return Ok(
+                new
+                {
+                    userName = phone,
+                    code = loginUser.Code
+                }
+            );
+
+
         }
 
         [Authorize]

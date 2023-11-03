@@ -36,7 +36,7 @@ namespace carsaApi.Controllers
         }
 
 
-        [Authorize(Roles = "user")]
+        // [Authorize(Roles = "user")]
         [HttpGet]
         [Route("get-Posts")]
         public async Task<ActionResult> GetAll()
@@ -60,7 +60,9 @@ namespace carsaApi.Controllers
                                        }
                                     );
 
-                }else{
+                }
+                else
+                {
                     responsePosts.Add(
                    new ResponsePost
                    {
@@ -79,42 +81,54 @@ namespace carsaApi.Controllers
 
 
 
-        [Authorize(Roles = "user")]
+        // [Authorize(Roles = "user")]
         [HttpGet]
         [Route("get-my-Posts")]
-        public async Task<ActionResult> GetMyPosts()
+        public async Task<ActionResult> GetMyPosts([FromForm] string userId)
         {
-            User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
-            var data = await _myDbContext.Posts.Where(p => p.UserId == user.Id).ToListAsync();
-            List<ResponsePost> responsePosts = new List<ResponsePost>();
-            foreach (var item in data)
-            {
 
-                User UserData = _myDbContext.Users.FirstOrDefault(p => p.Id == item.UserId);
-                responsePosts.Add(
-                   new ResponsePost
-                   {
-                       ImageUrlUser = UserData.ImageUrl,
-                       NameUser = UserData.FullName,
-                       Post = item
-                   }
-                );
+            var data = await _myDbContext.Posts.Where(p => p.UserId == userId).ToListAsync();
+            // List<ResponsePost> responsePosts = new List<ResponsePost>();
+            // foreach (var item in data)
+            // {
 
-            }
-            return Ok(responsePosts);
+            //     User UserData = _myDbContext.Users.FirstOrDefault(p => p.Id == item.UserId);
+            //     responsePosts.Add(
+            //        new ResponsePost
+            //        {
+            //            ImageUrlUser = UserData.ImageUrl,
+            //            NameUser = UserData.FullName,
+            //            Post = item
+            //        }
+            //     );
+
+            // }
+
+            return Ok(data);
+        }
+
+
+         [HttpGet]
+        [Route("get-Posts-admin")]
+        public async Task<ActionResult> GePostsAdmin()
+        {
+
+            var data = await _myDbContext.Posts.ToListAsync();
+           
+
+            return Ok(data);
         }
 
 
 
-
-        [Authorize(Roles = "user")]
+        // [Authorize(Roles = "user")]
         [HttpPost]
         [Route("add-post")]
         public async Task<ActionResult> CreatePost([FromForm] Post post)
         {
 
-            User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
-            post.UserId = user.Id;
+            // User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
+            // post.UserId = user.Id;
 
             await _myDbContext.Posts.AddAsync(post);
             _myDbContext.SaveChanges();
@@ -127,13 +141,13 @@ namespace carsaApi.Controllers
         }
 
 
-        [Authorize(Roles = "user")]
+        // [Authorize(Roles = "user")]
         [HttpPost]
         [Route("delete-Post")]
         public async Task<ActionResult> DeletePost([FromForm] int id)
         {
 
-            User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
+            // User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
             Post post = _myDbContext.Posts.FirstOrDefault(p => p.Id == id);
 
             if (post == null)
@@ -151,14 +165,63 @@ namespace carsaApi.Controllers
 
         }
 
+  // [Authorize(Roles = "user")]
+       
+        [HttpPost("get-post-byId")]
+        public async Task<ActionResult> GetPostById([FromForm] int id,[FromForm] string userId)
+        {
+          bool isOffer=false;
+            var post =await _myDbContext.Posts.FirstOrDefaultAsync(t => t.Id ==id);
+            if (post == null)
+            {
+                return NotFound();
+            }
+            User userDetail =await _myDbContext.Users.FirstOrDefaultAsync(t => t.Id ==post.UserId);
+
+             Comment offer=await _myDbContext.Comments.FirstOrDefaultAsync(t=> t.PostId==post.Id&&t.UserId==userId);
+          if(offer==null){
+            isOffer=false;
+          }else{
+            isOffer=true;
+          }
+
+            return Ok(new {
+                isOffer=isOffer,
+                post =post,
+                user =userDetail
+            });
+
+        }
 
 
-        [Authorize(Roles = "user")]
+        [HttpPost]
+        [Route("update-post-status")]
+        public async Task<ActionResult> UpdatePostStatus([FromForm] int id, [FromForm] int status)
+        {
+
+            // User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
+            Post post =await  _myDbContext.Posts.FirstOrDefaultAsync(p => p.Id == id);
+
+            if (post == null)
+            {
+
+                return NotFound();
+            }
+
+            post.AcceptedOfferId = status;
+
+            _myDbContext.SaveChanges();
+            return Ok(post);
+
+        }
+
+
+        // [Authorize(Roles = "user")]
         [HttpPost("{id}")]
         [Route("update-post")]
         public async Task<ActionResult> UpdatePost([FromForm] int id, [FromForm] CreatePostDto Post)
         {
-            User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
+            // User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
             var brandModelFromRepo = _repository.GetPostById(id);
             if (brandModelFromRepo == null)
             {
@@ -176,5 +239,8 @@ namespace carsaApi.Controllers
 
         }
 
+   
+   
+   
     }
 }

@@ -27,8 +27,8 @@ namespace carsaApi.Profiles
 
              CreateMap<CreateSuggestions, Suggestions>();
 
- CreateMap<CreateSittingDto, Sitting>();
 
+               CreateMap<CreateSittingDto, Sitting>();
             //User
             CreateMap<UserForRegister, User>();
 
@@ -40,8 +40,8 @@ namespace carsaApi.Profiles
             CreateMap<DriverForRegister, Driver>();
 
 
-            // CreateMap<CommandCreateDto, Command>();
-            // CreateMap<CommandUpdateDto, Command>();
+             CreateMap<UpdateWorkshopDto, Workshop>();
+            CreateMap<UpdateCarModelDto, CarModel>();
             // CreateMap<Command, CommandUpdateDto>();
             // CreateMap<Category, CategoryReadDto>();
             // CreateMap<CreateCategory, Category>();

@@ -25,6 +25,9 @@ namespace carsaApi.Data
 
         public DbSet<Category> Categories { get; set; }
 
+        public DbSet<WorkshopCategory> WorkCategories { get; set; }
+
+
         public DbSet<Product> Products { get; set; }
 
         public DbSet<Slider> Sliders { get; set; }
@@ -46,10 +49,15 @@ public DbSet<Sitting> Sittings { get; set; }
         public DbSet<Address> Addresses { get; set; }
 
 
+         public DbSet<Workshop> Workshops { get; set; }
+
+           public DbSet<CarModel> CarModels { get; set; }
+
+         public DbSet<Rate> Rets { get; set; }
         public DbSet<Driver> Drivers { get; set; }
         public DbSet<Driver_Field> Driver_Fields { get; set; }
         public DbSet<Driver_Order> Driver_Orders { get; set; }
-
+        public DbSet<Support> Supports { get; set; }
         internal object Where(Func<object, object> value)
         {
             throw new NotImplementedException();

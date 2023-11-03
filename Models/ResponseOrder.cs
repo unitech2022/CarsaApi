@@ -18,6 +18,6 @@ namespace carsaApi.Models
 
         public Address Address { get; set; }
 
-        public List<Cart> Products { get; set; }
+        // public List<ResponseCart> Products { get; set; }
     }
 }

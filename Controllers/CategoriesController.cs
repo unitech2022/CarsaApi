@@ -40,6 +40,14 @@ private readonly CarsaApiContext _context;
             return Ok(data);
         }
 
+       [HttpGet]
+        [Route("get-categories-work")]
+        public async Task<ActionResult> GetCategoriesWork ()
+        {
+            var data = await _context.WorkCategories.ToListAsync();
+            List<Workshop> workshops=await _context.Workshops.Where(t => t.Id==data.First().Id).ToListAsync();
+            return Ok(data);
+        }
 
 
         [HttpPost]
@@ -58,6 +66,21 @@ private readonly CarsaApiContext _context;
 
         }
 
+       [HttpPost]
+        [Route("add-category-work")]
+        public ActionResult<Category> CreateCategoryWork([FromForm] WorkshopCategory category)
+        {
+
+            
+            _repository.AddCategoryWork(category);
+            _repository.SaveChanges();
+            // var commandReadDto = _mapper.Map<CategoryReadDto>(coomansModel);
+
+
+            return Ok(category);
+
+
+        }
 
 
         [HttpPost]

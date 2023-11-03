@@ -13,9 +13,19 @@ namespace carsaApi.Models{
 
         public List<Category> categories { get; set; }
 
-        public List<Need> needs { get; set; }
+
+        public List<WorkshopCategory> categoriesWork { get; set; }
+
+
+         public List<Workshop> workshops { get; set; }
+        // public List<Need> needs { get; set; }
 
         public List<Sitting> sittings { get; set; }
+
+        public List<Favorite> favorites { get; set; }
+         public List<Cart> carts { get; set; }
+
+        public User User { get; set; }
 
     }
 

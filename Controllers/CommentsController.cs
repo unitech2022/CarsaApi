@@ -36,36 +36,49 @@ namespace carsaApi.Controllers
 
 
 
+        [HttpGet]
+        [Route("get-comments-admin")]
+        public async Task<ActionResult> GetAll([FromForm] string userId)
+        {
+
+            var data = await _myDbContext.Comments.Where(p => p.UserId == userId).ToListAsync();
+
+
+
+            return Ok(data);
+        }
+
+
+
 
         [HttpGet]
         [Route("get-comments")]
         public async Task<ActionResult> GetAll([FromForm] int postId)
         {
-            List<ResponseComment> comments = new List<ResponseComment>();
-
+            List<ResponseComment> comments = new();
 
             var data = await _myDbContext.Comments.Where(p => p.PostId == postId).ToListAsync();
 
-            // var data = await _myDbContext.Users.Where(x => x.UserId == user.Id).AsNoTracking().ToListAsync();
+            //    var data = await _myDbContext.Users.Where(x => x.UserId == user.Id).AsNoTracking().ToListAsync();
 
-            foreach (Comment variableName in data)
+            foreach (Comment comment in data)
             {
 
-                User user1Data = _myDbContext.Users.FirstOrDefault(p => p.Id == variableName.UserId);
+                Workshop workshop = _myDbContext.Workshops.FirstOrDefault(p => p.Id == comment.WorkshopId);
 
-                comments.Add(new ResponseComment
+                if (workshop != null)
                 {
-                    Id = variableName.Id,
-                    UserId = variableName.UserId,
-                    CreatedAt = variableName.CreatedAt,
-                    ImageUrl = user1Data.ImageUrl,
-                    Phone = variableName.Phone,
-                    PostId = variableName.PostId,
-                    SellerId = variableName.SellerId,
-                    Text = variableName.Text,
-                    UserName = user1Data.FullName
+                    ResponseComment responseComment = new()
+                    {
+                        comment = comment,
+                        ImageUrlWorkShop = workshop.Image,
 
-                });
+                        NameWorkShop = workshop.Name
+
+                    };
+
+                    comments.Add(responseComment);
+                }
 
                 // code block to be executed
             }
@@ -74,16 +87,38 @@ namespace carsaApi.Controllers
         }
 
 
+        [HttpGet]
+        [Route("get-comment-byId")]
+        public async Task<ActionResult> GetCommentById([FromForm] int commentId)
+        {
 
 
-        [Authorize(Roles = "user")]
+            Comment comment = await _myDbContext.Comments.FirstOrDefaultAsync(p => p.Id == commentId);
+            Post post = await _myDbContext.Posts.FirstOrDefaultAsync(p => p.Id == comment.PostId);
+            Workshop workshop = await _myDbContext.Workshops.FirstOrDefaultAsync(p => p.Id == comment.WorkshopId);
+            //    var data = await _myDbContext.Users.Where(x => x.UserId == user.Id).AsNoTracking().ToListAsync();
+
+
+
+            return Ok(new
+            {
+                offer = comment,
+                workshop = workshop,
+                post = post
+            });
+        }
+
+
+
+
+        // [Authorize(Roles = "user")]
         [HttpPost]
         [Route("add-comment")]
         public async Task<ActionResult> CreateComment([FromForm] Comment comment)
         {
 
-            User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
-            comment.UserId = user.Id;
+            // User user = await Functions.getCurrentUser(_httpContextAccessor, _myDbContext);
+            // comment.UserId = user.Id;
 
             await _myDbContext.Comments.AddAsync(comment);
             _myDbContext.SaveChanges();
@@ -95,26 +130,48 @@ namespace carsaApi.Controllers
 
         }
 
+        [HttpPost]
+        [Route("accept-comment")]
+        public async Task<ActionResult> AcceptComment([FromForm] int id)
+        {
+
+            var comment = await _myDbContext.Comments.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (comment == null)
+            {
+                return NotFound();
+            }
+            comment.Accepted = 1;
+            Post post = await _myDbContext.Posts.FirstOrDefaultAsync(t => t.Id == comment.PostId);
+            post.AcceptedOfferId = comment.Id;
+            _myDbContext.SaveChanges();
+            return Ok(comment);
 
 
-        // [HttpPost]
-        // [Route("delete-comment")]
-        // public ActionResult DeleteComment([FromForm] int id)
-        // {
 
-        //     // var CommentModelFromRepo = _repository.GetCommentById(id);
-        //     // if (CommentModelFromRepo == null)
-        //     // {
-        //     //     return NotFound();
-        //     // }
-
-        //     // _repository.DeleteComment(CommentModelFromRepo);
-        //     // _repository.SaveChanges();
-        //     // return Ok(CommentModelFromRepo.Text + "Deleted");
+        }
 
 
 
-        // }
+        [HttpPost]
+        [Route("delete-comment")]
+        public async Task<ActionResult> DeleteComment([FromForm] int id)
+        {
+
+            var comment = await _myDbContext.Comments.FirstOrDefaultAsync(t => t.Id == id);
+
+            if (comment == null)
+            {
+                return NotFound();
+            }
+            _myDbContext.Comments.Remove(comment);
+
+            _myDbContext.SaveChanges();
+            return Ok(comment);
+
+
+
+        }
 
 
 

@@ -155,5 +155,107 @@ namespace carsaApi.Controllers
             return Ok(users);
         }
 
+
+
+
+          //support
+
+        [HttpPost("support/add-message")]
+        public async Task<ActionResult> AddMessage([FromForm]Support support)
+        {
+             await _context.Supports.AddAsync(support);
+            if (support.Sender == "admin") {
+
+                
+              await  Functions.slt.SendNotificationAsync(new List<string>() { support.UserId }, "لديك رسالة جديدة", support.Message, _context);
+            } else {
+                
+
+              Sitting suggestions=_context.Sittings.FirstOrDefault(x => x.Name=="replay");
+                 if(suggestions.value=="true"){
+                   Support newSupport=new Support{
+                    UserId=support.UserId,
+                    Message="شكرا لتواصلك معنا سوف يتم الرد عليك في أسرع وقت ",
+                    Sender="admin",
+            
+                   };
+                    await _context.Supports.AddAsync(newSupport);
+             await  Functions.slt.SendNotificationAsync(new List<string>() { support.UserId }, "لديك رسالة جديدة", support.Message, _context);
+                 }
+            }
+            await _context.SaveChangesAsync();
+            
+            return Ok(true);
+        }
+
+
+
+        
+
+        [HttpPost("support/get-user-messages")]
+        public async Task<ActionResult> GetMessages([FromForm] string UserId)
+        {
+            var messages = await _context.Supports.Where(x => x.UserId == UserId).ToListAsync();
+            
+            return Ok(messages);
+        }
+        
+
+
+         [HttpPost("support/get-user-messages-admin")]
+        public async Task<ActionResult> GetMessagesAdmin([FromForm] string UserId)
+        {
+             List<ResponseMessage> responseMessages=new List<ResponseMessage>();
+            var messages = await _context.Supports.Where(x => x.UserId == UserId).ToListAsync();
+
+             foreach (var item in messages)
+            {
+                User user=_context.Users.FirstOrDefault(x => x.Id == item.UserId);
+
+             UserDetailResponse sender=   _mapper.Map<UserDetailResponse>(user);
+
+                responseMessages.Add(new ResponseMessage{
+                    Sender =sender,
+                    Support =item
+                });
+            }
+            
+            return Ok(responseMessages);
+        }
+        
+
+
+
+          [HttpPost("support/get-all-messages")]
+        public async Task<ActionResult> GetAllMessages([FromForm] string UserId)
+        {
+           List<ResponseMessage> responseMessages=new List<ResponseMessage>();
+
+            var messages = await _context.Supports.Where(x=> x.Sender !="admin").ToListAsync();
+
+            foreach (var item in messages)
+            {
+                User user=_context.Users.FirstOrDefault(x => x.Id == item.UserId);
+
+             UserDetailResponse sender=   _mapper.Map<UserDetailResponse>(user);
+
+                responseMessages.Add(new ResponseMessage{
+                    Sender =sender,
+                    Support =item
+                });
+            }
+            
+            return Ok(responseMessages);
+        }
+
+        [HttpPost("support/close-user-chat")]
+        public async Task<ActionResult> ClearMessages([FromForm] string UserId)
+        {
+            var messages = await _context.Supports.Where(x => x.UserId == UserId).ToListAsync();
+             _context.Supports.RemoveRange(messages);
+            await _context.SaveChangesAsync();
+            return Ok(true);
+        }
+
     }
 }

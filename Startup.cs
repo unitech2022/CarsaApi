@@ -40,7 +40,7 @@ namespace carsaApi
         {
 
 
-         //   notification
+            //   notification
             services.AddTransient<INotificationService, NotificationService>();
             services.AddHttpClient<FcmSender>();
             services.AddHttpClient<ApnSender>();
@@ -48,31 +48,25 @@ namespace carsaApi
             // Configure strongly typed settings objects
             var appSettingsSection = Configuration.GetSection("FcmNotification");
             services.Configure<FcmNotificationSetting>(appSettingsSection);
-// ---------------
+            // ---------------
 
 
 
-            services.AddDbContext<CarsaApiContext>(otp =>
-             otp.UseSqlServer(Configuration.GetConnectionString("CarsaApiConnection")));
+            // sql server
+            // services.AddDbContext<CarsaApiContext>(otp =>
+            //  otp.UseSqlServer(Configuration.GetConnectionString("CarsaApiConnection")));
+
+
+            // mysql
+            string mySqlConnectionStr = Configuration.GetConnectionString("CarsaApiConnection");
+            services.AddDbContextPool<CarsaApiContext>(options =>
+            {
+                options.UseMySql(mySqlConnectionStr, ServerVersion.AutoDetect(mySqlConnectionStr));
+                options.EnableSensitiveDataLogging();
+            });
 
 
 
-            services.AddCors(options =>
-
-               {
-
-                   options.AddPolicy(
-
-                   name: "AllowOrigin",
-
-                   builder =>
-                   {
-
-                       builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
-
-                   });
-
-               });
 
 
             services.AddControllers();
@@ -97,6 +91,20 @@ namespace carsaApi
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "carsaApi", Version = "v1" });
             });
+
+            // cors
+            services.AddCors(
+                options =>
+                {
+                    options.AddPolicy(
+                        name: "AllowOrigin",
+                        builder =>
+                        {
+                            builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                        }
+                    );
+                }
+            );
 
             // For Identity  
             services.AddIdentity<User, IdentityRole>()
@@ -143,6 +151,11 @@ namespace carsaApi
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
+
+            app.UseRouting();
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod());
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
@@ -151,8 +164,8 @@ namespace carsaApi
             }
 
             // app.UseHttpsRedirection();
-            app.UseCors("AllowOrigin");
-            app.UseRouting();
+            // app.UseCors("AllowOrigin");
+            // app.UseRouting();
 
             app.UseAuthentication();
 
